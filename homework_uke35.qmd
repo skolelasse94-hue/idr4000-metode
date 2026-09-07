@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+---title: "arbeidskrav 3"
 format: html
 editor: visual
 editor_options: 
@@ -13,6 +13,17 @@ editor_options:
 ```
 
 10. Bruk datasettet strengthvolume, sammenstill gjennomsnitt og standardavvik for maksimalstyrke i legext og legpress for hvert tidspunkt, sets og sex.
+
+```{r}
+
+library(exscidata)
+library(tidyverse)
+strengthvolume |> 
+  ggplot(strengthvolume, aes(x = legpress, y = legext)) + geom_point()
+
+
+
+```
 
 ```{r}
 library(exscidata)
@@ -97,8 +108,13 @@ mc <- cor(millward$RNA,
 mc^2
 
 #residuals
+```
 
-#lagre modellen
+```{r}
+
+```
+
+```{#lagre modellen}
 int <-coef(m) [1]
 slope <- coef(m) [2]
 
@@ -115,4 +131,4 @@ cowplot::plot_grid(p1, p2,
 
 ```
 
-$$y_i = \beta_0 + \beta_1 \times \text{RNA}_i$$
+$$y_i = \beta_0 + \beta_1 \times \text{RNA}_i$$\$\$y_i = \\beta_0 + \\beta_1 \\times \\text{RNA}\_i\$
