@@ -114,21 +114,12 @@ mc^2
 
 ```
 
-```{#lagre modellen}
-int <-coef(m) [1]
-slope <- coef(m) [2]
+\`\`\`{#lagre modellen} int \<-coef(m) \[1\] slope \<- coef(m) \[2\]
 
-#beregne prediskjonen 
-p2 <- millward |>
-  mutate(pred = int + slope * RNA, 
-         resid = protein_synthesis - pred) |>
-  ggplot(aes(RNA, resid)) + geom_point() + 
-    geom_hline(yintercept = 0)
-  
-cowplot::plot_grid(p1, p2, 
-                   ncol = 1)
+#beregne prediskjonen p2 \<- millward \|\> mutate(pred = int + slope \* RNA, resid = protein_synthesis - pred) \|\> ggplot(aes(RNA, resid)) + geom_point() + geom_hline(yintercept = 0)
 
+cowplot::plot_grid(p1, p2, ncol = 1)
 
-```
+\`\`\`
 
-$$y_i = \beta_0 + \beta_1 \times \text{RNA}_i$$\$\$y_i = \\beta_0 + \\beta_1 \\times \\text{RNA}\_i\$
+$$y_i = \beta_0 + \beta_1 \times \text{RNA}_i$$\$\$y_i = \\beta_0 + \\beta_1 \\times \\text{RNA}\_i\$\$\$\$y_i = \\beta_0 + \\beta_1 \\times \\text{RNA}\_i\$
