@@ -1,0 +1,118 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| eval: false
+#| echo: true
+#| message: false
+```
+
+10. Bruk datasettet strengthvolume, sammenstill gjennomsnitt og standardavvik for maksimalstyrke i legext og legpress for hvert tidspunkt, sets og sex.
+
+```{r}
+library(exscidata)
+library(tidyverse)
+
+
+
+# ta strengthvolume datasettet 
+strengthvolume |> 
+  #filter på tid, bruk session1 og post
+  filter(time %in% c("session1", "post")) |> 
+  #filter kun bruk legpress og legext
+  filter(exercise %in% c("legpress", "legext")) |> 
+  #summer på tid, kjønn, exercise, sets
+  summarise(
+    .by = c(time, exercise, sets), 
+    m = mean(load, na.rm = TRUE), 
+    s = sd(load, na.rm = TRUE), 
+    min = min(load, na.rm = TRUE), 
+    max = max(load, na.rm = TRUE), 
+    q25 = quantile(load, 0.25, na.rm = TRUE),
+    med = median(load, na.rm = TRUE), 
+    q75 = quantile(load, 0.75, na.rm = TRUE),
+  ) |> 
+  
+  mutate(time = factor(time, levels = c("session1", "post"))) |> 
+
+ggplot(aes(x = time, y = m, colour = sets,
+           shape = exercise,
+           group = paste(exercise, sets))) + 
+  geom_line() + 
+  geom_point() + 
+  geom_smooth()
+
+```
+
+```{r}
+# Bruk datasettetstrengthvolume og lag en graf som beskriver forhold mellom bevegelshastighet og styrke. Bevegelshastighet finnes i variabelen exercise, hvor isom er isometrisk styrke (0 grader/sek), isok.60, isok.120 og isok.240 er isokinetisk styrke ved 60, 120 og 240 grader per sekund. Undersøk om vi visuelt kan forskjell mellom i forhold mellom hastighet og kraft per tidspunkt og kjønn. Her kan man bruke en statistisk modell, for eksempel i JASPs Plot Builder, eller ved å bruke geom_smoothi ggplot2. Her må variablene forandres for å lage en kontinuerlig variabel som beskriver hastighet fra den kategoriske dataen i exercise.
+
+strength_speed <- strengthvolume |> 
+  filter(exercise %in% c ("isom", "isok.60", "isok.120", "isok.240")) |> mutate(
+    speed = case_when(
+      exercise == "isom" ~ 0,
+       exercise == "isok.60" ~ 60,
+       exercise == "isok.120" ~ 120,
+       exercise == "isok.240" ~ 240
+    )
+  )
+
+#sjekker at dette stemmer
+strength_speed |> 
+  select(exercise, speed) |> 
+  distinct()
+
+#lager graf
+ggplot(strength_speed, aes(x = speed, y = load, colour = sex)) + geom_point() + geom_smooth(method = "lm") + 
+  facet_wrap(~ time)
+
+```
+
+```{r}
+library(exscidata)
+library(tidyverse)
+
+p1 <- exscidata::millward |>
+  ggplot(aes(RNA, protein_synthesis)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", 
+              se = FALSE)
+
+#lager en statistisk modell 
+
+m <- lm(protein_synthesis ~ RNA, 
+        data = millward) 
+
+summary(m)
+summary(millward)
+
+#bergene en korrelasjon
+mc <- cor(millward$RNA,
+          millward$protein_synthesis)
+mc^2
+
+#residuals
+
+#lagre modellen
+int <-coef(m) [1]
+slope <- coef(m) [2]
+
+#beregne prediskjonen 
+p2 <- millward |>
+  mutate(pred = int + slope * RNA, 
+         resid = protein_synthesis - pred) |>
+  ggplot(aes(RNA, resid)) + geom_point() + 
+    geom_hline(yintercept = 0)
+  
+cowplot::plot_grid(p1, p2, 
+                   ncol = 1)
+
+
+```
+
+$$y_i = \beta_0 + \beta_1 \times \text{RNA}_i$$
