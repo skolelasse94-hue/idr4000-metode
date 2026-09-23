@@ -1,0 +1,153 @@
+---
+title: "hjemmelekse"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+
+opppgave 1.
+
+
+```{r}
+
+library(tidyverse)
+library(exscidata)
+library(ggplot2)
+
+b0 <- 9.45
+b1 <- 0.079579010
+b2 <- -0.001443157
+
+age <- seq(from = 18, to = 85, by = 1)
+age2 <- age^2
+
+data.frame(age, age2)
+
+
+
+
+
+dat <- exscidata::boston |>
+  filter(year == 2012) |>
+  mutate(speed = 42 / (seconds /60 / 60))
+
+
+dat |> 
+  filter(age == 45) |>
+  summarise(gjennomsnitt = mean(speed)) |>
+  print()
+
+data2 <- dat |> 
+  mutate(age2 = age^2) |>
+  select(speed, age, age2, gender) |>
+  print()
+
+data2 |>
+  ggplot(aes(age, speed)) + geom_point(alpha = 0.5)
+
+
+
+# Lag modellen
+
+m <- lm(speed ~ age + age2, 
+        data = data2)
+
+summary(m)
+
+
+#predikere for alder 45
+
+
+
+b0 <- coef(m)[1]
+b1 <- coef(m)[2]
+b2 <- coef(m)[3]
+
+age <- 45
+age2 <- age^2 
+
+y_pred <- b0 + b1 * age + b2 * age2
+
+
+print(y_pred)
+
+
+
+
+#predikere med predict()
+
+
+predict(m, newdata = data.frame(age = c(45, 50), age2 = c(45^2, 50^2)))
+
+```
+
+oppgave 2. 
+
+
+
+```{r}
+
+
+unique(data2$gender)
+
+
+m2 <- lm(speed ~ age + age2 + gender, 
+         data = data2)
+
+summary(m2)
+
+b0 <- coef(m2)[1]
+b1 <- coef(m2)[2]
+b2 <- coef(m2)[3]
+b3 <- coef(m2)[4]
+
+ata.frame(age = seq(from = 18, to = 85, by = 1)) |>
+  mutate(age2 = age^2) |>
+  expand_grid(gender = c(0,1)) |>
+  mutate(speed = b0 + b1 * age + b2 * age2 + b3 * gender) |>
+  
+  ggplot(aes(x = age, y = speed, group = as.factor(gender), 
+             colour = as.factor(gender))) +
+  geom_line()d
+
+
+
+```
+
+
+oppgave 3. 
+
+```{r}
+
+
+m3 <- lm(speed ~(age + age2) * gender,
+         data = data2)
+
+summary(m3)
+
+newdata <- data.frame(age = c(18, 40, 60, 85)) |>
+  mutate(age2 = age^2) |>
+  expand.grid(gender = c("F" , "M")) |>
+  print()
+
+newdata$pred <- predict(m3, newdata = newdata)
+
+
+
+data.frame(age = seq(from = 18, to = 85, by = 1)) |>
+  mutate(age2 = age^2) |>
+  expand_grid(gender = c(0,1)) |>
+  mutate(speed = b0 + b1 * age + b2 * age2 + b3 * gender) |>
+  
+  ggplot(aes(x = age, y = speed, group = as.factor(gender), 
+             colour = as.factor(gender))) +
+  geom_line() +
+  
+  geom_point(data = newdata,
+             aes(age, pred, colour = gender),
+             size = 3)
+
+```
+
